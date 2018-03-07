@@ -1,0 +1,1 @@
+docker build . -t winterttr/nodejs-win:1.3

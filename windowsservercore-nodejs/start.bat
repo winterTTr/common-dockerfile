@@ -1,0 +1,1 @@
+docker run -it --rm --volume D:\Sharing:C:\Sharing winterttr/nodejs-win:1.3

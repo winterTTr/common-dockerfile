@@ -1,0 +1,25 @@
+FROM microsoft/windowsservercore
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+
+# raw parameter
+ENV NODEJS_VERSION 8.9.4
+ENV NODEJS_INSTALLER_SHA256 547689da69bacadfee619d208702b73698d14297bd5fef5d80656897989e91b6
+ENV NODEJS_PATH C:\\Tools\\nodejs
+
+# constructed parameter
+ENV NODEJS_INSTALLER_URL https://nodejs.org/dist/v${NODEJS_VERSION}/node-v${NODEJS_VERSION}-x64.msi
+ENV NODEJS_INSTALLER node-v${NODEJS_VERSION}-x64.msi
+
+
+RUN Write-Host ('Downloading {0} ...' -f $env:NODEJS_INSTALLER_URL); \
+    Invoke-WebRequest -Uri $env:NODEJS_INSTALLER_URL -OutFile $env:NODEJS_INSTALLER; \
+    Write-Host ('Verifying sha256 {0} ...' -f $env:NODEJS_INSTALLER_SHA256); \
+	if ((Get-FileHash $env:NODEJS_INSTALLER -Algorithm sha256).Hash -ne $env:NODEJS_INSTALLER_SHA256) { \
+		Write-Host 'FAILED!'; \
+		exit 1; \
+	}; \
+    Write-Host ('Install {0} ...' -f $env:NODEJS_INSTALLER); \
+    Start-Service msiserver; \
+    & msiexec.exe /qn /i C:\$env:NODEJS_INSTALLER /l* "example.log" TARGETDIR=$env:NODEJS_PATH;
